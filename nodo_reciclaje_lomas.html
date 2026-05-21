@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nodo Reciclaje · Lomas de Zamora</title>
+<!-- SheetJS para exportar a Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1a0f;--bg2:#111f13;--bg3:#162119;
+  --card:#1a2b1c;--border:#2a4230;
+  --green:#4ade80;--green2:#22c55e;--green3:#16a34a;
+  --accent:#86efac;--yellow:#fbbf24;--blue:#60a5fa;
+  --red:#f87171;--purple:#c084fc;--orange:#fb923c;
+  --text:#e8f5e9;--text2:#9bbfa0;--text3:#6a9b70;
+  --shadow:0 8px 32px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── LOGIN ── */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background:radial-gradient(ellipse at 30% 40%,#1a3a1e 0%,#0d1a0f 60%);position:relative;}
+#loginScreen::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(74,222,128,.03) 40px,rgba(74,222,128,.03) 41px),
+  repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(74,222,128,.03) 40px,rgba(74,222,128,.03) 41px);}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:46px 42px;
+  width:380px;box-shadow:var(--shadow),0 0 80px rgba(74,222,128,.06);position:relative;z-index:1;}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.login-logo h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green);line-height:1.1;}
+.login-sub{color:var(--text3);font-size:12px;margin-bottom:30px;}
+.login-box label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+.login-box input,.login-box select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:16px;outline:none;transition:border .2s;}
+.login-box input:focus,.login-box select:focus{border-color:var(--green3);}
+.btn-login{width:100%;background:var(--green3);border:none;border-radius:10px;padding:13px;color:#fff;
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s,transform .1s;}
+.btn-login:hover{background:var(--green2);transform:translateY(-1px);}
+.login-err{color:var(--red);font-size:12px;margin-top:8px;text-align:center;display:none;}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh;}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:58px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hlogo{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--green);}
+.hlogo span{color:var(--text3);font-weight:400;font-size:12px;}
+.user-pill{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:5px 13px;font-size:12px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.admin-dot{background:var(--yellow)!important;}
+nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;display:flex;gap:2px;overflow-x:auto;}
+nav button{background:none;border:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:13px;
+  font-weight:500;padding:11px 14px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s;}
+nav button.active{color:var(--green);border-bottom-color:var(--green);}
+nav button:hover:not(.active){color:var(--text);}
+main{padding:24px 20px;max-width:1300px;margin:0 auto;}
+
+/* ── CARDS / FORMS ── */
+.page{display:none;}.page.active{display:block;}
+h2{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;margin-bottom:4px;}
+.page-sub{color:var(--text3);font-size:12px;margin-bottom:22px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:20px 22px;margin-bottom:18px;}
+.card h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px;color:var(--accent);}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;}
+.fg label{display:block;font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text3);text-transform:uppercase;margin-bottom:4px;}
+.fg input,.fg select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;
+  padding:9px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border .2s;}
+.fg input:focus,.fg select:focus{border-color:var(--green3);}
+.btn{background:var(--green3);border:none;border-radius:7px;padding:9px 20px;color:#fff;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s,transform .1s;}
+.btn:hover{background:var(--green2);transform:translateY(-1px);}
+.btn-sm{padding:5px 13px;font-size:12px;}
+.btn-danger{background:#7f1d1d!important;}.btn-danger:hover{background:var(--red)!important;}
+.btn-edit{background:#1e3a5f!important;}.btn-edit:hover{background:var(--blue)!important;}
+.btn-ghost{background:var(--bg3)!important;color:var(--text2)!important;}
+.btn-excel{background:#1a4731!important;border:1px solid #16a34a;}.btn-excel:hover{background:#166534!important;}
+.btn-orange{background:#7c2d12!important;border:1px solid var(--orange);}.btn-orange:hover{background:#9a3412!important;}
+.row-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+
+/* ── TABLA ── */
+.table-wrap{overflow-x:auto;margin-top:14px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{text-align:left;padding:9px 10px;color:var(--text3);font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid rgba(42,66,48,.45);transition:background .12s;}
+tbody tr:hover{background:rgba(74,222,128,.04);}
+tbody td{padding:9px 10px;color:var(--text2);vertical-align:middle;}
+.tag{display:inline-block;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;letter-spacing:.04em;margin:1px 1px 1px 0;}
+.tag-c{background:#1a3320;color:#4ade80;}.tag-dv{background:#1e3a5f;color:#60a5fa;}
+.tag-er{background:#3b1a5f;color:#c084fc;}.tag-v{background:#3a2e10;color:#fbbf24;}
+.tag-mat{background:#1f2f22;color:#86efac;border:1px solid #2a4230;font-size:10px;}
+.peso{color:var(--text);font-weight:600;}.monto{color:var(--yellow);font-weight:700;}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:22px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;position:relative;overflow:hidden;}
+.stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--green3);}
+.stat.y::after{background:var(--yellow);}.stat.b::after{background:var(--blue);}.stat.p::after{background:var(--purple);}
+.stat .lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.stat .val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;}
+.stat .unit{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* ── ALERTAS ── */
+.alert{padding:11px 15px;border-radius:7px;margin-bottom:14px;font-size:13px;display:none;}
+.alert-ok{background:#14532d;border:1px solid #16a34a;color:#86efac;}
+.alert-err{background:#7f1d1d;border:1px solid #dc2626;color:#fca5a5;}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:999;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:26px 28px;
+  width:min(560px,95vw);max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.modal h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:16px;}
+.modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end;flex-wrap:wrap;}
+
+/* ── FILTROS ── */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.filters input,.filters select{background:var(--bg3);border:1px solid var(--border);border-radius:7px;
+  padding:7px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;}
+
+/* ── DÍA SELECTOR ── */
+.day-banner{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;
+  margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.day-banner label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);}
+.day-banner input[type=date]{background:var(--bg3);border:1px solid var(--border);border-radius:7px;
+  padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;outline:none;}
+.day-banner input[type=date]:focus{border-color:var(--green3);}
+.day-banner .day-label{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--green);}
+
+/* ── MULTI-MAT ── */
+.sec-sep{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);
+  margin:16px 0 9px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.mat-picker{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:11px 13px;}
+.mat-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:18px;padding:4px 11px;cursor:pointer;font-size:11px;transition:all .15s;user-select:none;white-space:nowrap;}
+.chip:hover{border-color:var(--green3);}.chip.sel{background:#1a3320;border-color:var(--green3);color:var(--green);}
+.chip .cprice{font-size:9px;color:var(--text3);margin-left:2px;}.chip.sel .cprice{color:var(--green2);}
+.mat-rows{display:flex;flex-direction:column;gap:5px;margin-top:9px;}
+.mrow{display:flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:7px;padding:7px 11px;flex-wrap:wrap;}
+.mrow .mname{font-size:11px;font-weight:700;color:var(--green);min-width:100px;flex:1;}
+.mrow .mlbl{font-size:10px;color:var(--text3);}
+.mrow input{background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+  padding:4px 7px;color:var(--text);font-size:12px;outline:none;}
+.mrow input:focus{border-color:var(--green3);}
+.mrow .msub{margin-left:auto;color:var(--yellow);font-weight:700;font-size:12px;min-width:75px;text-align:right;}
+
+/* ── PRECIO TABLE ── */
+.ptable{width:100%;border-collapse:collapse;font-size:12px;}
+.ptable th{padding:8px 10px;color:var(--text3);font-size:10px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;border-bottom:1px solid var(--border);text-align:left;}
+.ptable td{padding:7px 10px;border-bottom:1px solid rgba(42,66,48,.35);}
+.ptable input{background:var(--bg3);border:1px solid var(--border);border-radius:5px;
+  padding:5px 8px;color:var(--text);font-size:12px;width:110px;outline:none;}
+.ptable input:focus{border-color:var(--green3);}
+
+/* ── DÍA RESUMEN TAB ── */
+.day-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:18px;}
+.day-card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:15px 18px;cursor:pointer;transition:border-color .2s;}
+.day-card:hover{border-color:var(--green3);}
+.day-card .dc-date{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--green);margin-bottom:4px;}
+.day-card .dc-sub{font-size:11px;color:var(--text3);}
+.day-card .dc-stats{margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;}
+.day-card .dc-stat{font-size:11px;color:var(--text2);}.dc-stat b{color:var(--text);}
+
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.empty{text-align:center;padding:36px;color:var(--text3);font-size:13px;}
+.empty .ei{font-size:32px;margin-bottom:8px;}
+.loading{text-align:center;padding:18px;color:var(--text3);font-size:12px;}
+@media(max-width:600px){main{padding:12px 10px;}.form-grid{grid-template-columns:1fr;}.stats-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><span style="font-size:34px">♻️</span><h1>Nodo Reciclaje<br>Lomas de Zamora</h1></div>
+    <p class="login-sub">Sistema de Gestión Operativa Municipal — Acceso independiente</p>
+    <label>Usuario</label>
+    <select id="loginUser"></select>
+    <label>Contraseña</label>
+    <input type="password" id="loginPass" placeholder="Ingresá tu contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">Ingresar al Sistema</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <header>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">♻️</span>
+      <div class="hlogo">Nodo Reciclaje <span>· Lomas de Zamora</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="user-pill"><div class="dot" id="uDot"></div><span id="uLabel">—</span></div>
+      <button class="btn btn-sm btn-danger" onclick="logout()">Salir</button>
+    </div>
+  </header>
+  <nav>
+    <button class="active" onclick="nav('dashboard',this)">📊 Dashboard</button>
+    <button onclick="nav('dias',this)">📅 Por Día</button>
+    <button onclick="nav('carreros',this)">🛒 Carreros</button>
+    <button onclick="nav('dv',this)">🌿 Día Verde</button>
+    <button onclick="nav('er',this)">🏭 Estación</button>
+    <button onclick="nav('ventas',this)">💰 Ventas</button>
+    <button onclick="nav('historial',this)">📋 Historial</button>
+    <button id="adminBtn" style="display:none" onclick="nav('admin',this)">⚙️ Admin</button>
+  </nav>
+  <main>
+    <div class="alert alert-ok" id="aOk"></div>
+    <div class="alert alert-err" id="aErr"></div>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <h2>Panel General</h2>
+      <p class="page-sub">Resumen operativo del nodo en tiempo real</p>
+
+      <!-- Selector de día de trabajo -->
+      <div class="day-banner">
+        <label>Día de trabajo activo:</label>
+        <input type="date" id="globalDay" onchange="saveDay()">
+        <span class="day-label" id="globalDayLabel"></span>
+        <span style="font-size:11px;color:var(--text3)">(todos los registros nuevos se cargan a este día)</span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat"><div class="lbl">Total Ingresado</div><div class="val" id="sKg">0</div><div class="unit">kg acumulados</div></div>
+        <div class="stat y"><div class="lbl">Pagado Carreros</div><div class="val" id="sPag">$0</div><div class="unit">pesos abonados</div></div>
+        <div class="stat b"><div class="lbl">Total Vendido</div><div class="val" id="sVend">$0</div><div class="unit">pesos cobrados</div></div>
+        <div class="stat p"><div class="lbl">Días de trabajo</div><div class="val" id="sDias">0</div><div class="unit">jornadas registradas</div></div>
+      </div>
+      <div class="card">
+        <h3>Últimos movimientos</h3>
+        <div class="table-wrap">
+          <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Materiales</th><th>Peso</th><th>Monto</th><th>Operador</th></tr></thead>
+          <tbody id="dashTbl"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ POR DÍA ══ -->
+    <div class="page" id="page-dias">
+      <h2>Resumen por Día de Trabajo</h2>
+      <p class="page-sub">Seleccioná un día para ver todos sus movimientos y exportarlos</p>
+      <div class="filters">
+        <input type="date" id="f_dia_desde" placeholder="Desde">
+        <input type="date" id="f_dia_hasta" placeholder="Hasta">
+        <button class="btn btn-sm" onclick="renderDias()">Filtrar</button>
+        <button class="btn btn-sm btn-excel" onclick="exportExcelDia()">📊 Exportar día seleccionado a Excel</button>
+      </div>
+      <div id="dayCards" class="day-cards"></div>
+      <div class="card" id="dayDetail" style="display:none">
+        <h3 id="dayDetailTitle">Detalle del día</h3>
+        <div class="table-wrap">
+          <table><thead><tr><th>Tipo</th><th>Detalle</th><th>Materiales</th><th>Peso</th><th>Monto</th><th>Operador</th></tr></thead>
+          <tbody id="dayDetailTbl"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CARREROS ══ -->
+    <div class="page" id="page-carreros">
+      <h2>Compra a Carreros</h2>
+      <p class="page-sub">Registro de material comprado a recicladores urbanos</p>
+      <div class="card">
+        <h3>➕ Nuevo registro · día: <span id="c_dayLabel" style="color:var(--green)"></span></h3>
+        <div class="form-grid">
+          <div class="fg"><label>Nombre del carrero</label><input type="text" id="c_nombre" placeholder="Apellido, Nombre"></div>
+          <div class="fg"><label>DNI / Código</label><input type="text" id="c_dni" placeholder="Opcional"></div>
+          <div class="fg"><label>Observaciones</label><input type="text" id="c_obs" placeholder="Opcional"></div>
+        </div>
+        <div class="sec-sep">Materiales recibidos — seleccioná uno o más</div>
+        <div class="mat-picker"><div class="mat-chips" id="c_chips"></div></div>
+        <div class="mat-rows" id="c_rows"></div>
+        <div class="row-btns">
+          <span style="font-size:13px;color:var(--text2)">Total: <b id="c_tot" style="color:var(--yellow);font-size:16px">$0</b></span>
+          <button class="btn" onclick="guardar('c')">Guardar registro</button>
+          <button class="btn btn-sm btn-ghost" onclick="limpiar('c')">Limpiar</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📋 Registros</h3>
+        <div class="filters">
+          <input type="date" id="fc_fecha" onchange="render('c')">
+          <input type="text" id="fc_q" placeholder="Buscar carrero..." oninput="render('c')">
+          <button class="btn btn-sm btn-excel" onclick="exportExcelModulo('c')">📊 Excel</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Fecha</th><th>Carrero</th><th>DNI</th><th>Materiales</th><th>Peso</th><th>Total $</th><th>Obs.</th><th>Operador</th><th id="th_c" style="display:none">Acc.</th></tr></thead>
+          <tbody id="tbl_c"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DÍA VERDE ══ -->
+    <div class="page" id="page-dv">
+      <h2>Día Verde</h2>
+      <p class="page-sub">Ingreso de material por jornada de recolección barrial</p>
+      <div class="card">
+        <h3>➕ Nuevo registro · día: <span id="dv_dayLabel" style="color:var(--green)"></span></h3>
+        <div class="form-grid">
+          <div class="fg"><label>Barrio / Sector</label><input type="text" id="dv_barrio" placeholder="Ej: Banfield Centro"></div>
+          <div class="fg"><label>Bultos / bolsones</label><input type="number" id="dv_bultos" placeholder="0" min="0"></div>
+          <div class="fg"><label>Nro. vehículo</label><input type="text" id="dv_vehiculo" placeholder="Opcional"></div>
+          <div class="fg"><label>Responsable</label><input type="text" id="dv_resp" placeholder="Nombre"></div>
+          <div class="fg"><label>Observaciones</label><input type="text" id="dv_obs" placeholder="Opcional"></div>
+        </div>
+        <div class="sec-sep">Materiales recibidos — seleccioná uno o más</div>
+        <div class="mat-picker"><div class="mat-chips" id="dv_chips"></div></div>
+        <div class="mat-rows" id="dv_rows"></div>
+        <div class="row-btns">
+          <span style="font-size:13px;color:var(--text2)">Peso total: <b id="dv_tot" style="color:var(--green);font-size:16px">0 kg</b></span>
+          <button class="btn" onclick="guardar('dv')">Guardar registro</button>
+          <button class="btn btn-sm btn-ghost" onclick="limpiar('dv')">Limpiar</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📋 Registros</h3>
+        <div class="filters">
+          <input type="date" id="fdv_fecha" onchange="render('dv')">
+          <input type="text" id="fdv_q" placeholder="Buscar barrio..." oninput="render('dv')">
+          <button class="btn btn-sm btn-excel" onclick="exportExcelModulo('dv')">📊 Excel</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Fecha</th><th>Barrio</th><th>Materiales</th><th>Bultos</th><th>Peso</th><th>Vehículo</th><th>Responsable</th><th>Operador</th><th id="th_dv" style="display:none">Acc.</th></tr></thead>
+          <tbody id="tbl_dv"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ESTACIÓN ══ -->
+    <div class="page" id="page-er">
+      <h2>Estación de Reciclaje</h2>
+      <p class="page-sub">Ingreso desde estación de transferencia o puntos fijos</p>
+      <div class="card">
+        <h3>➕ Nuevo registro · día: <span id="er_dayLabel" style="color:var(--green)"></span></h3>
+        <div class="form-grid">
+          <div class="fg"><label>Estación de origen</label><input type="text" id="er_origen" placeholder="Nombre de la estación"></div>
+          <div class="fg"><label>Nro. remito / ticket</label><input type="text" id="er_remito" placeholder="Número"></div>
+          <div class="fg"><label>Transportista</label><input type="text" id="er_transp" placeholder="Nombre o empresa"></div>
+          <div class="fg"><label>Condición</label><select id="er_cond"><option>Buena</option><option>Regular</option><option>Mala</option></select></div>
+          <div class="fg"><label>Observaciones</label><input type="text" id="er_obs" placeholder="Opcional"></div>
+        </div>
+        <div class="sec-sep">Materiales recibidos — seleccioná uno o más</div>
+        <div class="mat-picker"><div class="mat-chips" id="er_chips"></div></div>
+        <div class="mat-rows" id="er_rows"></div>
+        <div class="row-btns">
+          <span style="font-size:13px;color:var(--text2)">Peso total: <b id="er_tot" style="color:var(--green);font-size:16px">0 kg</b></span>
+          <button class="btn" onclick="guardar('er')">Guardar registro</button>
+          <button class="btn btn-sm btn-ghost" onclick="limpiar('er')">Limpiar</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📋 Registros</h3>
+        <div class="filters">
+          <input type="date" id="fer_fecha" onchange="render('er')">
+          <input type="text" id="fer_q" placeholder="Buscar estación..." oninput="render('er')">
+          <button class="btn btn-sm btn-excel" onclick="exportExcelModulo('er')">📊 Excel</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Fecha</th><th>Estación</th><th>Materiales</th><th>Peso</th><th>Remito</th><th>Transportista</th><th>Condición</th><th>Operador</th><th id="th_er" style="display:none">Acc.</th></tr></thead>
+          <tbody id="tbl_er"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VENTAS ══ -->
+    <div class="page" id="page-ventas">
+      <h2>Ventas a Empresas</h2>
+      <p class="page-sub">Registro de venta de material reciclado a empresas compradoras</p>
+      <div class="card">
+        <h3>➕ Nueva venta · día: <span id="v_dayLabel" style="color:var(--green)"></span></h3>
+        <div class="form-grid">
+          <div class="fg"><label>Empresa compradora</label><input type="text" id="v_empresa" placeholder="Nombre de la empresa"></div>
+          <div class="fg"><label>CUIT empresa</label><input type="text" id="v_cuit" placeholder="Opcional"></div>
+          <div class="fg"><label>Nro. factura / remito</label><input type="text" id="v_factura" placeholder="Opcional"></div>
+          <div class="fg"><label>Forma de pago</label><select id="v_pago"><option>Transferencia</option><option>Cheque</option><option>Efectivo</option><option>Otro</option></select></div>
+          <div class="fg"><label>Observaciones</label><input type="text" id="v_obs" placeholder="Opcional"></div>
+        </div>
+        <div class="sec-sep">Materiales vendidos — seleccioná uno o más</div>
+        <div class="mat-picker"><div class="mat-chips" id="v_chips"></div></div>
+        <div class="mat-rows" id="v_rows"></div>
+        <div class="row-btns">
+          <span style="font-size:13px;color:var(--text2)">Total venta: <b id="v_tot" style="color:var(--yellow);font-size:16px">$0</b></span>
+          <button class="btn" onclick="guardar('v')">Guardar venta</button>
+          <button class="btn btn-sm btn-ghost" onclick="limpiar('v')">Limpiar</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📋 Registros</h3>
+        <div class="filters">
+          <input type="date" id="fv_fecha" onchange="render('v')">
+          <input type="text" id="fv_q" placeholder="Buscar empresa..." oninput="render('v')">
+          <button class="btn btn-sm btn-excel" onclick="exportExcelModulo('v')">📊 Excel</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Fecha</th><th>Empresa</th><th>CUIT</th><th>Materiales</th><th>Peso</th><th>Total $</th><th>Factura</th><th>Pago</th><th>Operador</th><th id="th_v" style="display:none">Acc.</th></tr></thead>
+          <tbody id="tbl_v"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HISTORIAL ══ -->
+    <div class="page" id="page-historial">
+      <h2>Historial Completo</h2>
+      <p class="page-sub">Todos los movimientos del nodo</p>
+      <div class="card">
+        <div class="filters">
+          <input type="date" id="fh_desde"><input type="date" id="fh_hasta">
+          <select id="fh_tipo" onchange="renderHistorial()">
+            <option value="">Todos</option><option value="c">Carreros</option>
+            <option value="dv">Día Verde</option><option value="er">Estación</option><option value="v">Ventas</option>
+          </select>
+          <input type="text" id="fh_q" placeholder="Buscar..." oninput="renderHistorial()">
+          <button class="btn btn-sm" onclick="renderHistorial()">Filtrar</button>
+          <button class="btn btn-sm btn-excel" onclick="exportExcelCompleto()">📊 Excel completo</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Materiales</th><th>Peso</th><th>Monto</th><th>Operador</th></tr></thead>
+          <tbody id="tbl_h"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN ══ -->
+    <div class="page" id="page-admin">
+      <h2>Panel de Administración</h2>
+      <p class="page-sub">Acceso exclusivo administrador</p>
+
+      <!-- USUARIOS -->
+      <div class="card">
+        <h3>👥 Gestión de usuarios — nombre y contraseña</h3>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:14px">Podés cambiar el nombre visible y la contraseña de cada usuario.</p>
+        <table class="ptable" id="userTbl" style="margin-bottom:14px"></table>
+        <button class="btn" onclick="guardarUsuarios()">Guardar cambios de usuarios</button>
+      </div>
+
+      <!-- PRECIOS -->
+      <div class="card">
+        <h3>💲 Precios predeterminados por material ($/kg)</h3>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:14px">Se autocompletan al seleccionar materiales. Los operadores pueden ajustarlos por registro.</p>
+        <table class="ptable" id="precioTbl"></table>
+        <div class="row-btns" style="margin-top:14px">
+          <button class="btn" onclick="guardarPrecios()">Guardar precios</button>
+        </div>
+      </div>
+
+      <!-- EXPORTAR TODO -->
+      <div class="card">
+        <h3>📊 Exportar datos a Excel</h3>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:14px">Genera un archivo .xlsx con hojas separadas por módulo y una hoja de resumen general.</p>
+        <div class="row-btns">
+          <button class="btn btn-excel" onclick="exportExcelCompleto()">📊 Exportar todo a Excel</button>
+          <button class="btn btn-sm btn-orange" onclick="exportExcelPorDia()">📅 Excel por días de trabajo</button>
+        </div>
+      </div>
+
+      <!-- DB -->
+      <div class="card">
+        <h3>🗃️ Estado de la base de datos</h3>
+        <div id="dbStats" style="color:var(--text2);font-size:13px;line-height:2.2"></div>
+        <div class="row-btns" style="margin-top:14px">
+          <button class="btn btn-sm btn-danger" onclick="confirmarBorrado()">🗑️ Borrar TODOS los datos</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL EDICIÓN -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <h3 id="mTitle">Editar</h3>
+    <div id="mBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" onclick="eliminar()">Eliminar</button>
+      <button class="btn btn-sm btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-sm" onclick="guardarEdit()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════
+//  DATOS MAESTROS
+// ════════════════════════════════
+const MATS=['Cartón','Papel','Plástico PET','Plástico duro','Vidrio','Metales ferrosos','Aluminio','Tetra pak','Electrónico','Mixto'];
+const DEF_PRECIOS={
+  'Cartón':{c:150,v:200},'Papel':{c:120,v:170},'Plástico PET':{c:300,v:420},
+  'Plástico duro':{c:180,v:260},'Vidrio':{c:60,v:90},'Metales ferrosos':{c:400,v:600},
+  'Aluminio':{c:900,v:1300},'Tetra pak':{c:100,v:150},'Electrónico':{c:500,v:800},'Mixto':{c:80,v:120}
+};
+const DEF_USERS={
+  operador1:{n:'Operador 1',p:'op1lomas'},
+  operador2:{n:'Operador 2',p:'op2lomas'},
+  operador3:{n:'Operador 3',p:'op3lomas'},
+  admin:{n:'Administrador',p:'admin2024'}
+};
+
+// ════════════════════════════════
+//  ALMACENAMIENTO LOCAL (sin nube, sin Claude)
+// ════════════════════════════════
+const LS = {
+  get(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch{return false;}}
+};
+
+// ════════════════════════════════
+//  ESTADO GLOBAL
+// ════════════════════════════════
+let CU=null; // current user key
+let usuarios, precios, DATA={c:[],dv:[],er:[],v:[]};
+let MS={c:{},dv:{},er:{},v:{}}; // matState
+let editRec=null;
+let selectedDay=null; // día seleccionado en la tab "Por Día"
+
+// ════════════════════════════════
+//  INIT
+// ════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  usuarios = LS.get('nodo_users') || JSON.parse(JSON.stringify(DEF_USERS));
+  precios  = LS.get('nodo_prec')  || JSON.parse(JSON.stringify(DEF_PRECIOS));
+  DATA.c  = LS.get('nodo_c')  || [];
+  DATA.dv = LS.get('nodo_dv') || [];
+  DATA.er = LS.get('nodo_er') || [];
+  DATA.v  = LS.get('nodo_v')  || [];
+  buildLoginSel();
+});
+
+function buildLoginSel(){
+  const sel=document.getElementById('loginUser');
+  sel.innerHTML='<option value="">— Seleccioná un usuario —</option>';
+  Object.entries(usuarios).forEach(([k,u])=>sel.innerHTML+=`<option value="${k}">${u.n}</option>`);
+}
+
+// ════════════════════════════════
+//  LOGIN / LOGOUT
+// ════════════════════════════════
+function doLogin(){
+  const uk=document.getElementById('loginUser').value;
+  const pw=document.getElementById('loginPass').value;
+  if(!uk){loginErr('Seleccioná un usuario');return;}
+  if(!pw){loginErr('Ingresá la contraseña');return;}
+  if(usuarios[uk].p!==pw){loginErr('Contraseña incorrecta');return;}
+  CU=uk;
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('uLabel').textContent=usuarios[uk].n;
+  if(uk==='admin'){
+    document.getElementById('uDot').classList.add('admin-dot');
+    document.getElementById('adminBtn').style.display='block';
+    ['th_c','th_dv','th_er','th_v'].forEach(id=>document.getElementById(id).style.display='');
+  }
+  // Día activo
+  const saved=LS.get('nodo_day') || new Date().toISOString().split('T')[0];
+  document.getElementById('globalDay').value=saved;
+  updateDayLabel();
+  // Inicializar pickers
+  ['c','dv','er','v'].forEach(initPicker);
+  nav('dashboard',document.querySelector('nav button'));
+}
+function loginErr(m){const el=document.getElementById('loginErr');el.textContent=m;el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
+function logout(){
+  CU=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginUser').value='';
+  ['c','dv','er','v'].forEach(p=>{MS[p]={};});
+  document.getElementById('uDot').classList.remove('admin-dot');
+  document.getElementById('adminBtn').style.display='none';
+}
+
+// ════════════════════════════════
+//  DÍA DE TRABAJO
+// ════════════════════════════════
+function saveDay(){
+  const d=document.getElementById('globalDay').value;
+  LS.set('nodo_day',d);
+  updateDayLabel();
+  // Actualizar etiquetas en formularios
+  ['c','dv','er','v'].forEach(p=>{
+    const el=document.getElementById(p+'_dayLabel');
+    if(el)el.textContent=fmtFecha(d);
+  });
+}
+function updateDayLabel(){
+  const d=document.getElementById('globalDay').value;
+  const el=document.getElementById('globalDayLabel');
+  if(el)el.textContent=fmtFechaLarga(d);
+  ['c','dv','er','v'].forEach(p=>{
+    const el2=document.getElementById(p+'_dayLabel');
+    if(el2)el2.textContent=fmtFecha(d);
+  });
+}
+function getDay(){return document.getElementById('globalDay').value||new Date().toISOString().split('T')[0];}
+
+// ════════════════════════════════
+//  MATERIAL PICKER
+// ════════════════════════════════
+function initPicker(p){MS[p]={};buildChips(p);buildRows(p);}
+function buildChips(p){
+  const isV=(p==='v');
+  const cont=document.getElementById(p+'_chips');
+  if(!cont)return;
+  cont.innerHTML=MATS.map(m=>{
+    const sel=!!MS[p][m]?.sel;
+    const dp=isV?(precios[m]?.v||0):(precios[m]?.c||0);
+    return`<div class="chip${sel?' sel':''}" onclick="toggleMat('${p}','${esc(m)}')">${m}<span class="cprice">$${dp}/kg</span></div>`;
+  }).join('');
+}
+function toggleMat(p,m){
+  if(!MS[p][m])MS[p][m]={sel:false,peso:0,precio:0};
+  const isV=(p==='v');
+  MS[p][m].sel=!MS[p][m].sel;
+  if(MS[p][m].sel)MS[p][m].precio=isV?(precios[m]?.v||0):(precios[m]?.c||0);
+  buildChips(p);buildRows(p);calcTotal(p);
+}
+function buildRows(p){
+  const isV=(p==='v');const hasPr=(p==='c'||p==='v');
+  const cont=document.getElementById(p+'_rows');if(!cont)return;
+  const sel=MATS.filter(m=>MS[p][m]?.sel);
+  if(!sel.length){cont.innerHTML='';return;}
+  cont.innerHTML=sel.map(m=>{
+    const s=MS[p][m];const sub=(s.peso||0)*(s.precio||0);
+    return`<div class="mrow">
+      <span class="mname">${m}</span>
+      <span class="mlbl">Peso:</span>
+      <input type="number" min="0" step="0.1" value="${s.peso||''}" placeholder="kg" style="width:78px"
+        oninput="MS['${p}']['${esc(m)}'].peso=parseFloat(this.value)||0;calcTotal('${p}');updSub('${p}','${esc(m)}')">
+      ${hasPr?`<span class="mlbl">$/kg:</span>
+      <input type="number" min="0" step="1" value="${s.precio||''}" placeholder="precio" style="width:86px"
+        oninput="MS['${p}']['${esc(m)}'].precio=parseFloat(this.value)||0;calcTotal('${p}');updSub('${p}','${esc(m)}')">
+      <span class="msub" id="sub_${p}_${escId(m)}">$${sub.toLocaleString('es-AR')}</span>`:''}
+    </div>`;
+  }).join('');
+}
+function updSub(p,m){
+  const el=document.getElementById('sub_'+p+'_'+escId(m));if(!el)return;
+  const s=MS[p][m];el.textContent='$'+((s.peso||0)*(s.precio||0)).toLocaleString('es-AR');
+}
+function calcTotal(p){
+  const sel=MATS.filter(m=>MS[p][m]?.sel);
+  const kg=sel.reduce((a,m)=>a+(MS[p][m].peso||0),0);
+  const mo=sel.reduce((a,m)=>{const s=MS[p][m];return a+(s.peso||0)*(s.precio||0);},0);
+  const el=document.getElementById(p+'_tot');if(!el)return;
+  if(p==='c')el.textContent='$'+mo.toLocaleString('es-AR');
+  else if(p==='v')el.textContent='$'+mo.toLocaleString('es-AR');
+  else el.textContent=kg.toLocaleString('es-AR')+' kg';
+}
+function getLines(p){
+  return MATS.filter(m=>MS[p][m]?.sel).map(m=>({
+    mat:m,kg:MS[p][m].peso||0,pr:MS[p][m].precio||0,
+    sub:(MS[p][m].peso||0)*(MS[p][m].precio||0)
+  }));
+}
+function matTags(lines){
+  if(!lines||!lines.length)return'<span style="color:var(--text3)">—</span>';
+  return lines.map(l=>`<span class="tag tag-mat">${l.mat} ${l.kg}kg</span>`).join('');
+}
+
+// ════════════════════════════════
+//  GUARDAR REGISTROS
+// ════════════════════════════════
+const CFG={
+  c:{req:['c_nombre'],label:'carrero',tipo:'c'},
+  dv:{req:['dv_barrio'],label:'Día Verde',tipo:'dv'},
+  er:{req:['er_origen'],label:'estación',tipo:'er'},
+  v:{req:['v_empresa'],label:'venta',tipo:'v'}
+};
+
+function guardar(p){
+  const lines=getLines(p);
+  const missing=CFG[p].req.some(id=>!document.getElementById(id)?.value.trim());
+  if(missing||!lines.length){showAlert(`Completá los campos requeridos y seleccioná al menos un material`,false);return;}
+  const fecha=getDay();
+  const kg=lines.reduce((a,l)=>a+l.kg,0);
+  const total=lines.reduce((a,l)=>a+l.sub,0);
+  const base={id:Date.now().toString(),fecha,materiales:lines,pesoTotal:kg,operador:CU,ts:new Date().toISOString()};
+  let rec;
+  if(p==='c') rec={...base,nombre:g('c_nombre'),dni:g('c_dni'),total,obs:g('c_obs')};
+  else if(p==='dv') rec={...base,barrio:g('dv_barrio'),bultos:parseInt(g('dv_bultos'))||0,vehiculo:g('dv_vehiculo'),resp:g('dv_resp'),obs:g('dv_obs')};
+  else if(p==='er') rec={...base,origen:g('er_origen'),remito:g('er_remito'),transp:g('er_transp'),condicion:g('er_cond')||'Buena',obs:g('er_obs')};
+  else rec={...base,empresa:g('v_empresa'),cuit:g('v_cuit'),factura:g('v_factura'),pago:g('v_pago')||'Transferencia',total,obs:g('v_obs')};
+  DATA[p].unshift(rec);
+  LS.set('nodo_'+p,DATA[p]);
+  showAlert(`✅ ${CFG[p].label} guardado correctamente`);
+  limpiar(p);render(p);renderDashboard();
+}
+
+function limpiar(p){
+  const ids={
+    c:['c_nombre','c_dni','c_obs'],
+    dv:['dv_barrio','dv_bultos','dv_vehiculo','dv_resp','dv_obs'],
+    er:['er_origen','er_remito','er_transp','er_obs'],
+    v:['v_empresa','v_cuit','v_factura','v_obs']
+  };
+  ids[p].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  if(p==='er'){const ec=document.getElementById('er_cond');if(ec)ec.value='Buena';}
+  if(p==='v'){const vp=document.getElementById('v_pago');if(vp)vp.value='Transferencia';}
+  initPicker(p);
+}
+
+// ════════════════════════════════
+//  RENDER TABLAS
+// ════════════════════════════════
+function render(p){
+  const tbody=document.getElementById('tbl_'+p);if(!tbody)return;
+  const ff=g('f'+p+'_fecha'),fq=(g('f'+p+'_q')||'').toLowerCase();
+  let data=DATA[p].filter(r=>{
+    if(ff&&r.fecha!==ff)return false;
+    if(fq){
+      const str=JSON.stringify(r).toLowerCase();
+      if(!str.includes(fq))return false;
+    }
+    return true;
+  });
+  if(!data.length){tbody.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="ei">${{c:'🛒',dv:'🌿',er:'🏭',v:'💰'}[p]}</div>Sin registros</div></td></tr>`;return;}
+  const un=k=>usuarios[k]?.n||k;
+  const adm=CU==='admin';
+  tbody.innerHTML=data.map(r=>{
+    let cells='';
+    if(p==='c') cells=`<td>${fmtFecha(r.fecha)}</td><td><b>${r.nombre}</b></td><td>${r.dni||'—'}</td><td>${matTags(r.materiales)}</td><td class="peso">${(r.pesoTotal||0)} kg</td><td class="monto">$${(r.total||0).toLocaleString('es-AR')}</td><td>${r.obs||'—'}</td><td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>`;
+    else if(p==='dv') cells=`<td>${fmtFecha(r.fecha)}</td><td><b>${r.barrio}</b></td><td>${matTags(r.materiales)}</td><td>${r.bultos||0}</td><td class="peso">${(r.pesoTotal||0)} kg</td><td>${r.vehiculo||'—'}</td><td>${r.resp||'—'}</td><td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>`;
+    else if(p==='er'){
+      const cC={Buena:'#1a3320',Regular:'#3a2e10',Mala:'#3a1010'};
+      const cT={Buena:'#4ade80',Regular:'#fbbf24',Mala:'#f87171'};
+      cells=`<td>${fmtFecha(r.fecha)}</td><td><b>${r.origen}</b></td><td>${matTags(r.materiales)}</td><td class="peso">${(r.pesoTotal||0)} kg</td><td>${r.remito||'—'}</td><td>${r.transp||'—'}</td><td><span class="tag" style="background:${cC[r.condicion]};color:${cT[r.condicion]}">${r.condicion}</span></td><td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>`;
+    }
+    else cells=`<td>${fmtFecha(r.fecha)}</td><td><b>${r.empresa}</b></td><td style="font-size:10px">${r.cuit||'—'}</td><td>${matTags(r.materiales)}</td><td class="peso">${(r.pesoTotal||0)} kg</td><td class="monto">$${(r.total||0).toLocaleString('es-AR')}</td><td>${r.factura||'—'}</td><td style="font-size:10px">${r.pago}</td><td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>`;
+    const acc=adm?`<td><button class="btn btn-sm btn-edit" onclick="abrirEdit('${p}','${r.id}')">✏️</button></td>`:'';
+    return`<tr>${cells}${acc}</tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════
+function renderDashboard(){
+  const allIn=[...DATA.c,...DATA.dv,...DATA.er];
+  const kgT=allIn.reduce((a,r)=>a+(r.pesoTotal||0),0);
+  const pagT=DATA.c.reduce((a,r)=>a+(r.total||0),0);
+  const venT=DATA.v.reduce((a,r)=>a+(r.total||0),0);
+  const dias=new Set([...DATA.c,...DATA.dv,...DATA.er,...DATA.v].map(r=>r.fecha)).size;
+  document.getElementById('sKg').textContent=kgT.toLocaleString('es-AR');
+  document.getElementById('sPag').textContent='$'+pagT.toLocaleString('es-AR');
+  document.getElementById('sVend').textContent='$'+venT.toLocaleString('es-AR');
+  document.getElementById('sDias').textContent=dias;
+  const all=[
+    ...DATA.c.map(r=>({...r,tipo:'c',det:r.nombre,mo:r.total})),
+    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:0})),
+    ...DATA.er.map(r=>({...r,tipo:'er',det:r.origen,mo:0})),
+    ...DATA.v.map(r=>({...r,tipo:'v',det:r.empresa,mo:r.total}))
+  ].sort((a,b)=>b.ts.localeCompare(a.ts)).slice(0,25);
+  const un=k=>usuarios[k]?.n||k;
+  const lbl={c:'Carrero',dv:'Día Verde',er:'Estación',v:'Venta'};
+  const tbody=document.getElementById('dashTbl');
+  if(!all.length){tbody.innerHTML='<tr><td colspan="7" class="loading">Sin registros aún</td></tr>';return;}
+  tbody.innerHTML=all.map(r=>`<tr>
+    <td>${fmtFecha(r.fecha)}</td>
+    <td><span class="tag tag-${r.tipo}">${lbl[r.tipo]}</span></td>
+    <td>${r.det||'—'}</td>
+    <td>${matTags(r.materiales||[])}</td>
+    <td class="peso">${(r.pesoTotal||0)} kg</td>
+    <td class="monto">${r.mo?'$'+r.mo.toLocaleString('es-AR'):'—'}</td>
+    <td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>
+  </tr>`).join('');
+}
+
+// ════════════════════════════════
+//  POR DÍA
+// ════════════════════════════════
+function renderDias(){
+  const desde=g('f_dia_desde'),hasta=g('f_dia_hasta');
+  const allRecs=[
+    ...DATA.c.map(r=>({...r,tipo:'c',det:r.nombre,mo:r.total})),
+    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:0})),
+    ...DATA.er.map(r=>({...r,tipo:'er',det:r.origen,mo:0})),
+    ...DATA.v.map(r=>({...r,tipo:'v',det:r.empresa,mo:r.total}))
+  ];
+  // Agrupar por fecha
+  const byDay={};
+  allRecs.forEach(r=>{
+    if(desde&&r.fecha<desde)return;
+    if(hasta&&r.fecha>hasta)return;
+    if(!byDay[r.fecha])byDay[r.fecha]=[];
+    byDay[r.fecha].push(r);
+  });
+  const dias=Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
+  const cont=document.getElementById('dayCards');
+  if(!dias.length){cont.innerHTML='<div class="empty"><div class="ei">📅</div>Sin días registrados</div>';return;}
+  cont.innerHTML=dias.map(d=>{
+    const recs=byDay[d];
+    const kgT=recs.reduce((a,r)=>a+(r.pesoTotal||0),0);
+    const moT=recs.filter(r=>r.tipo==='v').reduce((a,r)=>a+(r.mo||0),0);
+    const pagT=recs.filter(r=>r.tipo==='c').reduce((a,r)=>a+(r.mo||0),0);
+    const tipos=[...new Set(recs.map(r=>r.tipo))];
+    const lbl={c:'🛒',dv:'🌿',er:'🏭',v:'💰'};
+    return`<div class="day-card" onclick="showDayDetail('${d}')">
+      <div class="dc-date">${fmtFechaLarga(d)}</div>
+      <div class="dc-sub">${recs.length} movimiento${recs.length!==1?'s':''} · ${tipos.map(t=>lbl[t]).join(' ')}</div>
+      <div class="dc-stats">
+        <span class="dc-stat">⚖️ <b>${kgT.toLocaleString('es-AR')} kg</b></span>
+        ${pagT?`<span class="dc-stat">💸 pag. <b>$${pagT.toLocaleString('es-AR')}</b></span>`:''}
+        ${moT?`<span class="dc-stat">💰 vta. <b>$${moT.toLocaleString('es-AR')}</b></span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('dayDetail').style.display='none';
+}
+
+function showDayDetail(fecha){
+  selectedDay=fecha;
+  const allRecs=[
+    ...DATA.c.map(r=>({...r,tipo:'c',det:r.nombre,mo:r.total})),
+    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:0})),
+    ...DATA.er.map(r=>({...r,tipo:'er',det:r.origen,mo:0})),
+    ...DATA.v.map(r=>({...r,tipo:'v',det:r.empresa,mo:r.total}))
+  ].filter(r=>r.fecha===fecha);
+  const lbl={c:'Carrero',dv:'Día Verde',er:'Estación',v:'Venta'};
+  const un=k=>usuarios[k]?.n||k;
+  document.getElementById('dayDetailTitle').textContent=`Detalle · ${fmtFechaLarga(fecha)}`;
+  document.getElementById('dayDetail').style.display='block';
+  document.getElementById('dayDetailTbl').innerHTML=allRecs.map(r=>`<tr>
+    <td><span class="tag tag-${r.tipo}">${lbl[r.tipo]}</span></td>
+    <td>${r.det||'—'}</td>
+    <td>${matTags(r.materiales||[])}</td>
+    <td class="peso">${(r.pesoTotal||0)} kg</td>
+    <td class="monto">${r.mo?'$'+r.mo.toLocaleString('es-AR'):'—'}</td>
+    <td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>
+  </tr>`).join('');
+  document.getElementById('dayDetail').scrollIntoView({behavior:'smooth'});
+}
+
+// ════════════════════════════════
+//  HISTORIAL
+// ════════════════════════════════
+function renderHistorial(){
+  const desde=g('fh_desde'),hasta=g('fh_hasta'),tipo=g('fh_tipo'),q=(g('fh_q')||'').toLowerCase();
+  const lbl={c:'Carrero',dv:'Día Verde',er:'Estación',v:'Venta'};
+  const un=k=>usuarios[k]?.n||k;
+  let all=[
+    ...DATA.c.map(r=>({...r,tipo:'c',det:r.nombre,mo:r.total})),
+    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:0})),
+    ...DATA.er.map(r=>({...r,tipo:'er',det:r.origen,mo:0})),
+    ...DATA.v.map(r=>({...r,tipo:'v',det:r.empresa,mo:r.total}))
+  ].sort((a,b)=>b.ts.localeCompare(a.ts));
+  if(desde)all=all.filter(r=>r.fecha>=desde);
+  if(hasta)all=all.filter(r=>r.fecha<=hasta);
+  if(tipo)all=all.filter(r=>r.tipo===tipo);
+  if(q)all=all.filter(r=>JSON.stringify(r).toLowerCase().includes(q));
+  const tbody=document.getElementById('tbl_h');
+  if(!all.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="ei">📋</div>Sin resultados</div></td></tr>';return;}
+  tbody.innerHTML=all.map(r=>`<tr>
+    <td>${fmtFecha(r.fecha)}</td>
+    <td><span class="tag tag-${r.tipo}">${lbl[r.tipo]}</span></td>
+    <td>${r.det||'—'}</td>
+    <td>${matTags(r.materiales||[])}</td>
+    <td class="peso">${(r.pesoTotal||0)} kg</td>
+    <td class="monto">${r.mo?'$'+r.mo.toLocaleString('es-AR'):'—'}</td>
+    <td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>
+  </tr>`).join('');
+}
+
+// ════════════════════════════════
+//  ADMIN
+// ════════════════════════════════
+function renderAdmin(){
+  // Tabla usuarios
+  const ut=document.getElementById('userTbl');
+  ut.innerHTML=`<thead><tr><th>Cuenta</th><th>Nombre visible</th><th>Nueva contraseña</th></tr></thead><tbody>
+  ${Object.entries(usuarios).map(([k,u])=>`<tr>
+    <td style="color:var(--text3);font-size:11px;font-weight:700">${k}</td>
+    <td><input id="un_${k}" value="${u.n}" style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 9px;color:var(--text);font-size:13px;width:170px;outline:none"></td>
+    <td><input id="up_${k}" placeholder="Sin cambios" type="text" style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 9px;color:var(--text);font-size:13px;width:150px;outline:none"></td>
+  </tr>`).join('')}</tbody>`;
+  // Tabla precios
+  const pt=document.getElementById('precioTbl');
+  pt.innerHTML=`<thead><tr><th>Material</th><th>Precio compra $/kg</th><th>Precio venta $/kg</th></tr></thead><tbody>
+  ${MATS.map(m=>`<tr>
+    <td style="font-weight:600;color:var(--text)">${m}</td>
+    <td><input type="number" id="pc_${escId(m)}" value="${precios[m]?.c||0}" min="0" step="1"></td>
+    <td><input type="number" id="pv_${escId(m)}" value="${precios[m]?.v||0}" min="0" step="1"></td>
+  </tr>`).join('')}</tbody>`;
+  // Stats
+  const allRecs=[...DATA.c,...DATA.dv,...DATA.er,...DATA.v];
+  const dias=new Set(allRecs.map(r=>r.fecha)).size;
+  document.getElementById('dbStats').innerHTML=`
+    🛒 Registros Carreros: <b style="color:var(--green)">${DATA.c.length}</b><br>
+    🌿 Registros Día Verde: <b style="color:var(--blue)">${DATA.dv.length}</b><br>
+    🏭 Registros Estación: <b style="color:var(--purple)">${DATA.er.length}</b><br>
+    💰 Registros Ventas: <b style="color:var(--yellow)">${DATA.v.length}</b><br>
+    📅 Días de trabajo: <b style="color:var(--accent)">${dias}</b><br>
+    📦 Total kg ingresados: <b style="color:var(--accent)">${[...DATA.c,...DATA.dv,...DATA.er].reduce((a,r)=>a+(r.pesoTotal||0),0).toLocaleString('es-AR')} kg</b><br>
+    💵 Total pagado carreros: <b style="color:var(--yellow)">$${DATA.c.reduce((a,r)=>a+(r.total||0),0).toLocaleString('es-AR')}</b><br>
+    💵 Total cobrado ventas: <b style="color:var(--green)">$${DATA.v.reduce((a,r)=>a+(r.total||0),0).toLocaleString('es-AR')}</b>`;
+}
+
+function guardarUsuarios(){
+  Object.keys(usuarios).forEach(k=>{
+    const n=document.getElementById('un_'+k)?.value.trim();
+    const p=document.getElementById('up_'+k)?.value.trim();
+    if(n)usuarios[k].n=n;
+    if(p)usuarios[k].p=p;
+  });
+  LS.set('nodo_users',usuarios);
+  buildLoginSel();
+  document.getElementById('uLabel').textContent=usuarios[CU].n;
+  Object.keys(usuarios).forEach(k=>{const el=document.getElementById('up_'+k);if(el)el.value='';});
+  showAlert('✅ Usuarios actualizados');
+}
+
+function guardarPrecios(){
+  MATS.forEach(m=>{
+    precios[m]={
+      c:parseFloat(document.getElementById('pc_'+escId(m))?.value)||0,
+      v:parseFloat(document.getElementById('pv_'+escId(m))?.value)||0
+    };
+  });
+  LS.set('nodo_prec',precios);
+  ['c','dv','er','v'].forEach(p=>buildChips(p));
+  showAlert('✅ Precios actualizados');
+}
+
+function confirmarBorrado(){
+  if(!confirm('⚠️ ¿Eliminar TODOS los registros? Acción irreversible.'))return;
+  if(!confirm('Confirmar borrado permanente de todos los datos'))return;
+  DATA={c:[],dv:[],er:[],v:[]};
+  ['c','dv','er','v'].forEach(p=>LS.set('nodo_'+p,[]));
+  showAlert('✅ Datos eliminados');renderAdmin();renderDashboard();
+}
+
+// ════════════════════════════════
+//  EDICIÓN ADMIN
+// ════════════════════════════════
+function abrirEdit(tipo,id){
+  const rec=DATA[tipo].find(r=>r.id===id);if(!rec)return;
+  editRec={tipo,id};
+  const lbl={c:'Carrero',dv:'Día Verde',er:'Estación',v:'Venta'};
+  document.getElementById('mTitle').textContent='Editar · '+lbl[tipo];
+  const fi=(l,eid,val,tp='text')=>`<div style="margin-bottom:10px"><label style="display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:3px">${l}</label><input type="${tp}" id="ed_${eid}" value="${val||''}" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:13px;outline:none"></div>`;
+  const fs=(l,eid,val,opts)=>`<div style="margin-bottom:10px"><label style="display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:3px">${l}</label><select id="ed_${eid}" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:13px;outline:none">${opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select></div>`;
+  let html=fi('Fecha','fecha',rec.fecha,'date');
+  if(tipo==='c') html+=fi('Carrero','nombre',rec.nombre)+fi('DNI','dni',rec.dni)+fi('Obs.','obs',rec.obs);
+  else if(tipo==='dv') html+=fi('Barrio','barrio',rec.barrio)+fi('Bultos','bultos',rec.bultos,'number')+fi('Vehículo','vehiculo',rec.vehiculo)+fi('Responsable','resp',rec.resp)+fi('Obs.','obs',rec.obs);
+  else if(tipo==='er') html+=fi('Estación','origen',rec.origen)+fi('Remito','remito',rec.remito)+fi('Transportista','transp',rec.transp)+fs('Condición','condicion',rec.condicion,['Buena','Regular','Mala'])+fi('Obs.','obs',rec.obs);
+  else html+=fi('Empresa','empresa',rec.empresa)+fi('CUIT','cuit',rec.cuit)+fi('Factura','factura',rec.factura)+fs('Pago','pago',rec.pago,['Transferencia','Cheque','Efectivo','Otro'])+fi('Obs.','obs',rec.obs);
+  const hasPr=(tipo==='c'||tipo==='v');
+  const matH=(rec.materiales||[]).map((l,i)=>`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;flex-wrap:wrap">
+      <span style="flex:1;min-width:90px;font-size:11px;font-weight:700;color:var(--green)">${l.mat}</span>
+      <input type="number" placeholder="kg" value="${l.kg}" id="em_k_${i}" style="width:72px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 6px;color:var(--text);font-size:11px;outline:none">
+      ${hasPr?`<input type="number" placeholder="$/kg" value="${l.pr}" id="em_p_${i}" style="width:80px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 6px;color:var(--text);font-size:11px;outline:none">`:''}
+    </div>`).join('');
+  if(matH)html+=`<div style="margin:12px 0 5px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3)">Materiales</div>${matH}`;
+  document.getElementById('mBody').innerHTML=html;
+  document.getElementById('editModal').classList.add('open');
+}
+function cerrarModal(){document.getElementById('editModal').classList.remove('open');editRec=null;}
+function guardarEdit(){
+  if(!editRec)return;
+  const{tipo,id}=editRec;
+  const ge=k=>{const el=document.getElementById('ed_'+k);return el?el.value:'';};
+  const idx=DATA[tipo].findIndex(r=>r.id===id);if(idx<0)return;
+  const orig=DATA[tipo][idx];
+  const hasPr=(tipo==='c'||tipo==='v');
+  const nm=(orig.materiales||[]).map((l,i)=>({
+    mat:l.mat,
+    kg:parseFloat(document.getElementById('em_k_'+i)?.value)||0,
+    pr:hasPr?(parseFloat(document.getElementById('em_p_'+i)?.value)||0):0,
+    sub:(parseFloat(document.getElementById('em_k_'+i)?.value)||0)*(hasPr?(parseFloat(document.getElementById('em_p_'+i)?.value)||0):0)
+  }));
+  const npk=nm.reduce((a,l)=>a+l.kg,0);
+  const npt=nm.reduce((a,l)=>a+l.sub,0);
+  let upd={...orig,fecha:ge('fecha'),materiales:nm,pesoTotal:npk};
+  if(tipo==='c')upd={...upd,nombre:ge('nombre'),dni:ge('dni'),obs:ge('obs'),total:npt};
+  else if(tipo==='dv')upd={...upd,barrio:ge('barrio'),bultos:parseInt(ge('bultos'))||0,vehiculo:ge('vehiculo'),resp:ge('resp'),obs:ge('obs')};
+  else if(tipo==='er')upd={...upd,origen:ge('origen'),remito:ge('remito'),transp:ge('transp'),condicion:ge('condicion'),obs:ge('obs')};
+  else upd={...upd,empresa:ge('empresa'),cuit:ge('cuit'),factura:ge('factura'),pago:ge('pago'),obs:ge('obs'),total:npt};
+  DATA[tipo][idx]=upd;
+  LS.set('nodo_'+tipo,DATA[tipo]);
+  showAlert('✅ Registro actualizado');cerrarModal();render(tipo);renderDashboard();
+}
+function eliminar(){
+  if(!editRec)return;
+  if(!confirm('¿Eliminar este registro permanentemente?'))return;
+  const{tipo,id}=editRec;
+  DATA[tipo]=DATA[tipo].filter(r=>r.id!==id);
+  LS.set('nodo_'+tipo,DATA[tipo]);
+  showAlert('✅ Registro eliminado');cerrarModal();render(tipo);renderDashboard();
+}
+
+// ════════════════════════════════
+//  EXPORTAR A EXCEL (SheetJS)
+// ════════════════════════════════
+function matStr(lines){return(lines||[]).map(l=>`${l.mat}: ${l.kg}kg${l.pr?' @ $'+l.pr:''}`).join(' | ');}
+function matKgStr(lines){return(lines||[]).map(l=>`${l.mat}: ${l.kg}kg`).join(' | ');}
+const un=k=>usuarios[k]?.n||k;
+
+function exportExcelCompleto(){
+  const wb=XLSX.utils.book_new();
+  // Hoja Resumen
+  const allRecs=[...DATA.c,...DATA.dv,...DATA.er,...DATA.v];
+  const dias=new Set(allRecs.map(r=>r.fecha)).size;
+  const kgT=[...DATA.c,...DATA.dv,...DATA.er].reduce((a,r)=>a+(r.pesoTotal||0),0);
+  const resumen=[
+    ['NODO DE RECICLAJE MUNICIPAL · LOMAS DE ZAMORA'],
+    ['Generado el', new Date().toLocaleDateString('es-AR')],[''],
+    ['RESUMEN GENERAL'],
+    ['Indicador','Valor'],
+    ['Registros Carreros',DATA.c.length],
+    ['Registros Día Verde',DATA.dv.length],
+    ['Registros Estación',DATA.er.length],
+    ['Registros Ventas',DATA.v.length],
+    ['Días de trabajo',dias],
+    ['Total kg ingresados',kgT],
+    ['Total pagado carreros',DATA.c.reduce((a,r)=>a+(r.total||0),0)],
+    ['Total cobrado ventas',DATA.v.reduce((a,r)=>a+(r.total||0),0)]
+  ];
+  const wsR=XLSX.utils.aoa_to_sheet(resumen);
+  wsR['!cols']=[{wch:30},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,wsR,'Resumen');
+  // Hoja Carreros
+  const cRows=[['Fecha','Carrero','DNI','Materiales','Peso Total (kg)','Total ($)','Obs.','Operador'],
+    ...DATA.c.map(r=>[r.fecha,r.nombre,r.dni||'',matStr(r.materiales),r.pesoTotal||0,r.total||0,r.obs||'',un(r.operador)])];
+  const wsC=XLSX.utils.aoa_to_sheet(cRows);
+  wsC['!cols']=[{wch:12},{wch:22},{wch:14},{wch:50},{wch:14},{wch:14},{wch:20},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,wsC,'Carreros');
+  // Hoja Día Verde
+  const dvRows=[['Fecha','Barrio','Materiales','Bultos','Peso Total (kg)','Vehículo','Responsable','Obs.','Operador'],
+    ...DATA.dv.map(r=>[r.fecha,r.barrio,matKgStr(r.materiales),r.bultos||0,r.pesoTotal||0,r.vehiculo||'',r.resp||'',r.obs||'',un(r.operador)])];
+  const wsDV=XLSX.utils.aoa_to_sheet(dvRows);
+  wsDV['!cols']=[{wch:12},{wch:22},{wch:50},{wch:8},{wch:14},{wch:14},{wch:18},{wch:20},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,wsDV,'Dia Verde');
+  // Hoja Estación
+  const erRows=[['Fecha','Estación','Materiales','Peso Total (kg)','Remito','Transportista','Condición','Obs.','Operador'],
+    ...DATA.er.map(r=>[r.fecha,r.origen,matKgStr(r.materiales),r.pesoTotal||0,r.remito||'',r.transp||'',r.condicion,r.obs||'',un(r.operador)])];
+  const wsER=XLSX.utils.aoa_to_sheet(erRows);
+  wsER['!cols']=[{wch:12},{wch:22},{wch:50},{wch:14},{wch:14},{wch:20},{wch:10},{wch:20},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,wsER,'Estacion');
+  // Hoja Ventas
+  const vRows=[['Fecha','Empresa','CUIT','Materiales','Peso Total (kg)','Total ($)','Factura','Forma de pago','Obs.','Operador'],
+    ...DATA.v.map(r=>[r.fecha,r.empresa,r.cuit||'',matStr(r.materiales),r.pesoTotal||0,r.total||0,r.factura||'',r.pago,r.obs||'',un(r.operador)])];
+  const wsV=XLSX.utils.aoa_to_sheet(vRows);
+  wsV['!cols']=[{wch:12},{wch:22},{wch:14},{wch:50},{wch:14},{wch:14},{wch:14},{wch:14},{wch:20},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,wsV,'Ventas');
+  // Guardar
+  XLSX.writeFile(wb,'nodo_reciclaje_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function exportExcelModulo(p){
+  const lbl={c:'Carreros',dv:'Dia_Verde',er:'Estacion',v:'Ventas'};
+  const wb=XLSX.utils.book_new();
+  let rows;
+  if(p==='c') rows=[['Fecha','Carrero','DNI','Materiales','Peso (kg)','Total ($)','Obs.','Operador'],...DATA.c.map(r=>[r.fecha,r.nombre,r.dni||'',matStr(r.materiales),r.pesoTotal||0,r.total||0,r.obs||'',un(r.operador)])];
+  else if(p==='dv') rows=[['Fecha','Barrio','Materiales','Bultos','Peso (kg)','Vehículo','Responsable','Obs.','Operador'],...DATA.dv.map(r=>[r.fecha,r.barrio,matKgStr(r.materiales),r.bultos||0,r.pesoTotal||0,r.vehiculo||'',r.resp||'',r.obs||'',un(r.operador)])];
+  else if(p==='er') rows=[['Fecha','Estación','Materiales','Peso (kg)','Remito','Transportista','Condición','Obs.','Operador'],...DATA.er.map(r=>[r.fecha,r.origen,matKgStr(r.materiales),r.pesoTotal||0,r.remito||'',r.transp||'',r.condicion,r.obs||'',un(r.operador)])];
+  else rows=[['Fecha','Empresa','CUIT','Materiales','Peso (kg)','Total ($)','Factura','Pago','Obs.','Operador'],...DATA.v.map(r=>[r.fecha,r.empresa,r.cuit||'',matStr(r.materiales),r.pesoTotal||0,r.total||0,r.factura||'',r.pago,r.obs||'',un(r.operador)])];
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb,ws,lbl[p]);
+  XLSX.writeFile(wb,`nodo_${lbl[p]}_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+function exportExcelDia(){
+  const fecha=selectedDay||getDay();
+  const allRecs=[
+    ...DATA.c.filter(r=>r.fecha===fecha).map(r=>({tipo:'Carrero',det:r.nombre,extra:r.dni||'',mat:matStr(r.materiales),kg:r.pesoTotal||0,mo:r.total||0,op:un(r.operador)})),
+    ...DATA.dv.filter(r=>r.fecha===fecha).map(r=>({tipo:'Día Verde',det:r.barrio,extra:r.resp||'',mat:matKgStr(r.materiales),kg:r.pesoTotal||0,mo:0,op:un(r.operador)})),
+    ...DATA.er.filter(r=>r.fecha===fecha).map(r=>({tipo:'Estación',det:r.origen,extra:r.condicion,mat:matKgStr(r.materiales),kg:r.pesoTotal||0,mo:0,op:un(r.operador)})),
+    ...DATA.v.filter(r=>r.fecha===fecha).map(r=>({tipo:'Venta',det:r.empresa,extra:r.factura||'',mat:matStr(r.materiales),kg:r.pesoTotal||0,mo:r.total||0,op:un(r.operador)}))
+  ];
+  if(!allRecs.length){showAlert('No hay registros para este día',false);return;}
+  const wb=XLSX.utils.book_new();
+  const rows=[
+    [`Nodo Reciclaje Lomas de Zamora — Día: ${fmtFechaLarga(fecha)}`],[''],
+    ['Tipo','Detalle','Extra','Materiales','Peso (kg)','Monto ($)','Operador'],
+    ...allRecs.map(r=>[r.tipo,r.det,r.extra,r.mat,r.kg,r.mo,r.op]),
+    [''],
+    ['TOTALES'],
+    ['Peso total kg',allRecs.reduce((a,r)=>a+r.kg,0)],
+    ['Total pagado',allRecs.filter(r=>r.tipo==='Carrero').reduce((a,r)=>a+r.mo,0)],
+    ['Total vendido',allRecs.filter(r=>r.tipo==='Venta').reduce((a,r)=>a+r.mo,0)]
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:12},{wch:22},{wch:16},{wch:50},{wch:12},{wch:14},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,'Dia_'+fecha);
+  XLSX.writeFile(wb,'nodo_dia_'+fecha+'.xlsx');
+}
+
+function exportExcelPorDia(){
+  const wb=XLSX.utils.book_new();
+  const allRecs=[
+    ...DATA.c.map(r=>({...r,tipo:'Carrero',det:r.nombre,mo:r.total||0})),
+    ...DATA.dv.map(r=>({...r,tipo:'Día Verde',det:r.barrio,mo:0})),
+    ...DATA.er.map(r=>({...r,tipo:'Estación',det:r.origen,mo:0})),
+    ...DATA.v.map(r=>({...r,tipo:'Venta',det:r.empresa,mo:r.total||0}))
+  ];
+  const byDay={};
+  allRecs.forEach(r=>{if(!byDay[r.fecha])byDay[r.fecha]=[];byDay[r.fecha].push(r);});
+  const dias=Object.keys(byDay).sort();
+  if(!dias.length){showAlert('Sin datos para exportar',false);return;}
+  // Resumen por días
+  const resRows=[['Fecha','Registros','Kg Ingresados','Pagado Carreros ($)','Vendido ($)']];
+  dias.forEach(d=>{
+    const recs=byDay[d];
+    resRows.push([d,recs.length,
+      recs.reduce((a,r)=>a+(r.pesoTotal||0),0),
+      recs.filter(r=>r.tipo==='Carrero').reduce((a,r)=>a+r.mo,0),
+      recs.filter(r=>r.tipo==='Venta').reduce((a,r)=>a+r.mo,0)
+    ]);
+  });
+  const wsRes=XLSX.utils.aoa_to_sheet(resRows);
+  wsRes['!cols']=[{wch:14},{wch:10},{wch:16},{wch:22},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,wsRes,'Resumen por día');
+  // Una hoja por día (máx 20 para no hacer demasiado grande)
+  dias.slice(-20).forEach(d=>{
+    const rows=[
+      [`Día: ${d}`],[''],
+      ['Tipo','Detalle','Materiales','Peso (kg)','Monto ($)','Operador'],
+      ...byDay[d].map(r=>[r.tipo,r.det,matStr(r.materiales),r.pesoTotal||0,r.mo,un(r.operador)])
+    ];
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:12},{wch:22},{wch:45},{wch:12},{wch:12},{wch:16}];
+    XLSX.utils.book_append_sheet(wb,ws,d);
+  });
+  XLSX.writeFile(wb,'nodo_por_dias_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+// ════════════════════════════════
+//  NAV / HELPERS
+// ════════════════════════════════
+function nav(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='dashboard'){renderDashboard();updateDayLabel();}
+  if(name==='dias')renderDias();
+  if(name==='carreros'){render('c');updateDayLabel();}
+  if(name==='dv'){render('dv');updateDayLabel();}
+  if(name==='er'){render('er');updateDayLabel();}
+  if(name==='ventas'){render('v');updateDayLabel();}
+  if(name==='historial')renderHistorial();
+  if(name==='admin')renderAdmin();
+}
+function showAlert(msg,ok=true){
+  const el=document.getElementById(ok?'aOk':'aErr');el.textContent=msg;el.style.display='block';
+  setTimeout(()=>el.style.display='none',3500);
+}
+function g(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+function fmtFecha(f){if(!f)return'—';const[y,m,d]=f.split('-');return`${d}/${m}/${y}`;}
+function fmtFechaLarga(f){
+  if(!f)return'—';
+  const[y,m,d]=f.split('-');
+  const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  try{const dt=new Date(y,m-1,d);return`${dias[dt.getDay()]} ${parseInt(d)} de ${meses[parseInt(m)-1]} ${y}`;}
+  catch{return`${d}/${m}/${y}`;}
+}
+function esc(s){return s.replace(/'/g,"\\'");}
+function escId(s){return s.replace(/[^a-zA-Z0-9]/g,'_');}
+</script>
+</body>
+</html>
