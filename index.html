@@ -330,7 +330,7 @@ tbody td{padding:9px 10px;color:var(--text2);vertical-align:middle;}
 
       <div class="stats-grid">
         <div class="stat"><div class="lbl">Total Ingresado</div><div class="val" id="sKg">0</div><div class="unit">kg acumulados</div></div>
-        <div class="stat y"><div class="lbl">Pagado Carreros</div><div class="val" id="sPag">$0</div><div class="unit">pesos abonados</div></div>
+        <div class="stat y"><div class="lbl">Pagado Compras</div><div class="val" id="sPag">$0</div><div class="unit">carreros + día verde</div></div>
         <div class="stat b"><div class="lbl">Total Vendido</div><div class="val" id="sVend">$0</div><div class="unit">pesos cobrados</div></div>
         <div class="stat p"><div class="lbl">Días de trabajo</div><div class="val" id="sDias">0</div><div class="unit">jornadas registradas</div></div>
       </div>
@@ -418,8 +418,8 @@ tbody td{padding:9px 10px;color:var(--text2);vertical-align:middle;}
 
     <!-- ══ DÍA VERDE ══ -->
     <div class="page" id="page-dv">
-      <h2>Día Verde</h2>
-      <p class="page-sub">Ingreso de material por jornada de recolección barrial</p>
+      <h2>🌿 Día Verde</h2>
+      <p class="page-sub">Ingreso y compra de material por jornada de recolección barrial</p>
       <div class="card">
         <h3>➕ Nuevo registro · día: <span id="dv_dayLabel" style="color:var(--green)"></span></h3>
         <div class="form-grid">
@@ -435,9 +435,18 @@ tbody td{padding:9px 10px;color:var(--text2);vertical-align:middle;}
           <button class="btn btn-sm" onclick="addLinea('dv')">+ Agregar línea</button>
         </div>
         <div class="mat-rows" id="dv_rows"><div class="mrow-empty">Ningún material agregado aún</div></div>
+        <!-- Resumen de operación (igual que carreros) -->
+        <div class="op-resumen" id="dv_resumen">
+          <div class="op-resumen-title">📋 Resumen de la operación</div>
+          <div class="op-resumen-items" id="dv_resumen_items"></div>
+          <div class="op-resumen-total">
+            <span class="ot-label">Total a pagar</span>
+            <span class="ot-val" id="dv_resumen_total">$0</span>
+          </div>
+        </div>
         <div class="row-btns">
-          <span style="font-size:13px;color:var(--text2)">Peso total: <b id="dv_tot" style="color:var(--green);font-size:16px">0 kg</b></span>
-          <button class="btn" onclick="guardar('dv')">Guardar registro</button>
+          <span style="font-size:13px;color:var(--text2)">Total: <b id="dv_tot" style="color:var(--yellow);font-size:16px">$0</b></span>
+          <button class="btn" onclick="guardar('dv')">💾 Guardar registro</button>
           <button class="btn btn-sm btn-ghost" onclick="limpiar('dv')">Limpiar</button>
         </div>
       </div>
@@ -449,7 +458,7 @@ tbody td{padding:9px 10px;color:var(--text2);vertical-align:middle;}
           <button class="btn btn-sm btn-excel" onclick="exportExcelModulo('dv')">📊 Excel</button>
         </div>
         <div class="table-wrap">
-          <table><thead><tr><th>Fecha</th><th>Barrio</th><th>Materiales</th><th>Bultos</th><th>Peso</th><th>Vehículo</th><th>Responsable</th><th>Operador</th><th id="th_dv" style="display:none">Acc.</th></tr></thead>
+          <table><thead><tr><th>Fecha</th><th>Barrio</th><th>Materiales</th><th>Bultos</th><th>Peso</th><th>Total $</th><th>Vehículo</th><th>Responsable</th><th>Operador</th><th id="th_dv" style="display:none">Acc.</th></tr></thead>
           <tbody id="tbl_dv"></tbody></table>
         </div>
       </div>
@@ -1143,13 +1152,13 @@ function calcTotal(p){
   const kg=lines.reduce((a,l)=>a+(l.kg||0),0);
   const mo=lines.reduce((a,l)=>a+(l.kg||0)*(l.precio||0),0);
   const el=document.getElementById(p+'_tot');if(!el)return;
-  if(p==='c'||p==='v') el.textContent='$'+mo.toLocaleString('es-AR');
+  if(p==='c'||p==='v'||p==='dv') el.textContent='$'+mo.toLocaleString('es-AR');
   else el.textContent=kg.toLocaleString('es-AR')+' kg';
-  // Resumen panel (solo carreros)
-  if(p==='c'){
-    const res=document.getElementById('c_resumen');
-    const resItems=document.getElementById('c_resumen_items');
-    const resTot=document.getElementById('c_resumen_total');
+  // Resumen panel — carreros y día verde
+  if(p==='c'||p==='dv'){
+    const res=document.getElementById(p+'_resumen');
+    const resItems=document.getElementById(p+'_resumen_items');
+    const resTot=document.getElementById(p+'_resumen_total');
     if(res&&resItems&&resTot){
       if(lines.length){
         resItems.innerHTML=lines.map(l=>{
@@ -1232,7 +1241,7 @@ function guardar(p){
   const base={id:Date.now().toString(),fecha,materiales:lines,pesoTotal:kg,operador:CU,ts:new Date().toISOString()};
   let rec;
   if(p==='c') rec={...base,nombre:g('c_nombre'),dni:g('c_dni'),total,obs:g('c_obs')};
-  else if(p==='dv') rec={...base,barrio:g('dv_barrio'),bultos:parseInt(g('dv_bultos'))||0,vehiculo:g('dv_vehiculo'),resp:g('dv_resp'),obs:g('dv_obs')};
+  else if(p==='dv') rec={...base,barrio:g('dv_barrio'),bultos:parseInt(g('dv_bultos'))||0,vehiculo:g('dv_vehiculo'),resp:g('dv_resp'),total,obs:g('dv_obs')};
   else if(p==='er') rec={...base,origen:g('er_origen'),remito:g('er_remito'),transp:g('er_transp'),condicion:g('er_cond')||'Buena',obs:g('er_obs')};
   else rec={...base,empresa:g('v_empresa'),cuit:g('v_cuit'),factura:g('v_factura'),pago:g('v_pago')||'Transferencia',total,obs:g('v_obs')};
   DATA[p].unshift(rec);
@@ -1278,7 +1287,7 @@ function render(p){
   tbody.innerHTML=data.map(r=>{
     let cells='';
     if(p==='c') cells=`<td>${fmtFecha(r.fecha)}</td><td><b>${r.nombre}</b></td><td>${r.dni||'—'}</td><td>${matTagsDetalle(r.materiales)}</td><td class="peso">${(r.pesoTotal||0)} kg</td><td class="monto">$${(r.total||0).toLocaleString('es-AR')}</td><td>${r.obs||'—'}</td><td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>`;
-    else if(p==='dv') cells=`<td>${fmtFecha(r.fecha)}</td><td><b>${r.barrio}</b></td><td>${matTags(r.materiales)}</td><td>${r.bultos||0}</td><td class="peso">${(r.pesoTotal||0)} kg</td><td>${r.vehiculo||'—'}</td><td>${r.resp||'—'}</td><td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>`;
+    else if(p==='dv') cells=`<td>${fmtFecha(r.fecha)}</td><td><b>${r.barrio}</b></td><td>${matTags(r.materiales)}</td><td>${r.bultos||0}</td><td class="peso">${(r.pesoTotal||0)} kg</td><td class="monto">${r.total?'$'+r.total.toLocaleString('es-AR'):'—'}</td><td>${r.vehiculo||'—'}</td><td>${r.resp||'—'}</td><td style="font-size:10px;color:var(--text3)">${un(r.operador)}</td>`;
     else if(p==='er'){
       const cC={Buena:'#1a3320',Regular:'#3a2e10',Mala:'#3a1010'};
       const cT={Buena:'#4ade80',Regular:'#fbbf24',Mala:'#f87171'};
@@ -1296,7 +1305,7 @@ function render(p){
 function renderDashboard(){
   const allIn=[...DATA.c,...DATA.dv,...DATA.er];
   const kgT=allIn.reduce((a,r)=>a+(r.pesoTotal||0),0);
-  const pagT=DATA.c.reduce((a,r)=>a+(r.total||0),0);
+  const pagT=DATA.c.reduce((a,r)=>a+(r.total||0),0)+DATA.dv.reduce((a,r)=>a+(r.total||0),0);
   const venT=DATA.v.reduce((a,r)=>a+(r.total||0),0);
   const dias=new Set([...DATA.c,...DATA.dv,...DATA.er,...DATA.v].map(r=>r.fecha)).size;
   document.getElementById('sKg').textContent=kgT.toLocaleString('es-AR');
@@ -1305,7 +1314,7 @@ function renderDashboard(){
   document.getElementById('sDias').textContent=dias;
   const all=[
     ...DATA.c.map(r=>({...r,tipo:'c',det:r.nombre,mo:r.total})),
-    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:0})),
+    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:r.total||0})),
     ...DATA.er.map(r=>({...r,tipo:'er',det:r.origen,mo:0})),
     ...DATA.v.map(r=>({...r,tipo:'v',det:r.empresa,mo:r.total}))
   ].sort((a,b)=>b.ts.localeCompare(a.ts)).slice(0,25);
@@ -1331,7 +1340,7 @@ function renderDias(){
   const desde=g('f_dia_desde'),hasta=g('f_dia_hasta');
   const allRecs=[
     ...DATA.c.map(r=>({...r,tipo:'c',det:r.nombre,mo:r.total})),
-    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:0})),
+    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:r.total||0})),
     ...DATA.er.map(r=>({...r,tipo:'er',det:r.origen,mo:0})),
     ...DATA.v.map(r=>({...r,tipo:'v',det:r.empresa,mo:r.total}))
   ];
@@ -1370,7 +1379,7 @@ function showDayDetail(fecha){
   selectedDay=fecha;
   const allRecs=[
     ...DATA.c.map(r=>({...r,tipo:'c',det:r.nombre,mo:r.total})),
-    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:0})),
+    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:r.total||0})),
     ...DATA.er.map(r=>({...r,tipo:'er',det:r.origen,mo:0})),
     ...DATA.v.map(r=>({...r,tipo:'v',det:r.empresa,mo:r.total}))
   ].filter(r=>r.fecha===fecha);
@@ -1398,7 +1407,7 @@ function renderHistorial(){
   const un=k=>usuarios[k]?.n||k;
   let all=[
     ...DATA.c.map(r=>({...r,tipo:'c',det:r.nombre,mo:r.total})),
-    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:0})),
+    ...DATA.dv.map(r=>({...r,tipo:'dv',det:r.barrio,mo:r.total||0})),
     ...DATA.er.map(r=>({...r,tipo:'er',det:r.origen,mo:0})),
     ...DATA.v.map(r=>({...r,tipo:'v',det:r.empresa,mo:r.total}))
   ].sort((a,b)=>b.ts.localeCompare(a.ts));
@@ -1874,7 +1883,7 @@ function exportExcelModulo(p){
   const wb=XLSX.utils.book_new();
   let rows;
   if(p==='c') rows=[['Fecha','Carrero','DNI','Materiales','Peso (kg)','Total ($)','Obs.','Operador'],...DATA.c.map(r=>[r.fecha,r.nombre,r.dni||'',matStr(r.materiales),r.pesoTotal||0,r.total||0,r.obs||'',un(r.operador)])];
-  else if(p==='dv') rows=[['Fecha','Barrio','Materiales','Bultos','Peso (kg)','Vehículo','Responsable','Obs.','Operador'],...DATA.dv.map(r=>[r.fecha,r.barrio,matKgStr(r.materiales),r.bultos||0,r.pesoTotal||0,r.vehiculo||'',r.resp||'',r.obs||'',un(r.operador)])];
+  else if(p==='dv') rows=[['Fecha','Barrio','Materiales','Bultos','Peso (kg)','Total $','Vehículo','Responsable','Obs.','Operador'],...DATA.dv.map(r=>[r.fecha,r.barrio,matKgStr(r.materiales),r.bultos||0,r.pesoTotal||0,r.total||0,r.vehiculo||'',r.resp||'',r.obs||'',un(r.operador)])];
   else if(p==='er') rows=[['Fecha','Estación','Materiales','Peso (kg)','Remito','Transportista','Condición','Obs.','Operador'],...DATA.er.map(r=>[r.fecha,r.origen,matKgStr(r.materiales),r.pesoTotal||0,r.remito||'',r.transp||'',r.condicion,r.obs||'',un(r.operador)])];
   else rows=[['Fecha','Empresa','CUIT','Materiales','Peso (kg)','Total ($)','Factura','Pago','Obs.','Operador'],...DATA.v.map(r=>[r.fecha,r.empresa,r.cuit||'',matStr(r.materiales),r.pesoTotal||0,r.total||0,r.factura||'',r.pago,r.obs||'',un(r.operador)])];
   const ws=XLSX.utils.aoa_to_sheet(rows);
@@ -1886,7 +1895,7 @@ function exportExcelDia(){
   const fecha=selectedDay||getDay();
   const allRecs=[
     ...DATA.c.filter(r=>r.fecha===fecha).map(r=>({tipo:'Carrero',det:r.nombre,extra:r.dni||'',mat:matStr(r.materiales),kg:r.pesoTotal||0,mo:r.total||0,op:un(r.operador)})),
-    ...DATA.dv.filter(r=>r.fecha===fecha).map(r=>({tipo:'Día Verde',det:r.barrio,extra:r.resp||'',mat:matKgStr(r.materiales),kg:r.pesoTotal||0,mo:0,op:un(r.operador)})),
+    ...DATA.dv.filter(r=>r.fecha===fecha).map(r=>({tipo:'Día Verde',det:r.barrio,extra:r.resp||'',mat:matKgStr(r.materiales),kg:r.pesoTotal||0,mo:r.total||0,op:un(r.operador)})),
     ...DATA.er.filter(r=>r.fecha===fecha).map(r=>({tipo:'Estación',det:r.origen,extra:r.condicion,mat:matKgStr(r.materiales),kg:r.pesoTotal||0,mo:0,op:un(r.operador)})),
     ...DATA.v.filter(r=>r.fecha===fecha).map(r=>({tipo:'Venta',det:r.empresa,extra:r.factura||'',mat:matStr(r.materiales),kg:r.pesoTotal||0,mo:r.total||0,op:un(r.operador)}))
   ];
@@ -1912,7 +1921,7 @@ function exportExcelPorDia(){
   const wb=XLSX.utils.book_new();
   const allRecs=[
     ...DATA.c.map(r=>({...r,tipo:'Carrero',det:r.nombre,mo:r.total||0})),
-    ...DATA.dv.map(r=>({...r,tipo:'Día Verde',det:r.barrio,mo:0})),
+    ...DATA.dv.map(r=>({...r,tipo:'Día Verde',det:r.barrio,mo:r.total||0})),
     ...DATA.er.map(r=>({...r,tipo:'Estación',det:r.origen,mo:0})),
     ...DATA.v.map(r=>({...r,tipo:'Venta',det:r.empresa,mo:r.total||0}))
   ];
